@@ -1,0 +1,3 @@
+<config>
+	<system crypto = "false" amqpHost = "upsilon" />
+</config>
