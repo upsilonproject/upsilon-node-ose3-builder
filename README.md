@@ -5,9 +5,44 @@ an OSE3 container via the S2I process.
 
 ## OSE3 Setup
 
+Node: You need to create the app using the command line because the interface (@3.1) doesn't allow you to create a builder from a source repository, which is what we need to do. 
+
+1. Create a project with any name you like, which will contain your app. 
+
 ```
-	oc new-app https://github.com/upsilonproject/upsilon-node-ose3-el7.git
+oc new-project upsilon-node
 ```
+
+2. Create the new app using the Git URL of this repository. You should to specify the deployment configuration environemnt variables here or the first deployment will fail. If you don't though, you could always edit the environment variables later in the deployment config. 
+
+```
+oc new-app https://github.com/upsilonproject/upsilon-node-ose3-el7.git -e UPSILON_IDENTIFIER=testing-node -e UPSILON_CONFIG_SYSTEM_AMQPHOST=amqp1.example.com
+```
+
+This creates a new imageStream, BuildConfig and DeploymentConfig. It will spawn a new build in the background. 
+
+3. After a minute or two, you should see the `-build` pod has completed, and a deployed pod;
+
+```
+user@host: oc get pods
+NAME                            READY     STATUS      RESTARTS   AGE
+upsilon-node-ose3-el7-1-build   0/1       Completed   0          6m
+upsilon-node-ose3-el7-1-p6ut2   1/1       Running     0          5m
+```
+
+4. You can view the logs as normal; 
+
+```
+user@host: oc logs upsilon-node-ose3-el7-1-p6ut2
+DEBUG Logging override configuration exists, parsing: /etc/upsilon-node/logging.xml
+INFO  Upsilon 2.1.0-1458766566
+INFO  ----------
+INFO  Identifier: testing-node
+INFO  Setting AMQPHost from ENV: amqp1.example.com
+...
+```
+
+After the node has sent it's first heartbeat which is inserted into the database, the node can be configured from upsilon-web. 
 
 ## Configuration
 
